@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
     mainlayout->addWidget(tool);
 
     QHBoxLayout *sublayout = new QHBoxLayout;
-    sublayout->addWidget(panel, 1);
+    sublayout->addWidget(panel.get(), 1);
     sublayout->addWidget(view, 3);
 
     mainlayout->addLayout(sublayout);
@@ -35,8 +35,10 @@ bool MainWindow::loadFile(const QString &fileName)
 {
     QImageReader reader(fileName);
     reader.setAutoTransform(true);
-    const QImage newImage = reader.read();
-    if (newImage.isNull()) {
+    //const QImage newImage = reader.read();
+    QImage newImage;
+    if (newImage.isNull())
+    {
         QMessageBox::information(this, QGuiApplication::applicationDisplayName(),
                                  tr("Cannot load %1: %2")
                                  .arg(QDir::toNativeSeparators(fileName), reader.errorString()));
@@ -48,7 +50,7 @@ bool MainWindow::loadFile(const QString &fileName)
     setWindowFilePath(fileName);
 
     const QString message = tr("Opened \"%1\", %2x%3, Depth: %4")
-        .arg(QDir::toNativeSeparators(fileName)).arg(originalImage.width()).arg(originalImage.height()).arg(originalImage.depth());
+            .arg(QDir::toNativeSeparators(fileName)).arg(originalImage.width()).arg(originalImage.height()).arg(originalImage.depth());
     statusBar()->showMessage(message);
     return true;
 }
@@ -63,7 +65,8 @@ static void initializeImageFileDialog(QFileDialog &dialog, QFileDialog::AcceptMo
 {
     static bool firstDialog = true;
 
-    if (firstDialog) {
+    if (firstDialog)
+    {
         firstDialog = false;
         const QStringList picturesLocations = QStandardPaths::standardLocations(QStandardPaths::PicturesLocation);
         dialog.setDirectory(picturesLocations.isEmpty() ? QDir::currentPath() : picturesLocations.last());
@@ -71,7 +74,7 @@ static void initializeImageFileDialog(QFileDialog &dialog, QFileDialog::AcceptMo
 
     QStringList mimeTypeFilters;
     const QByteArrayList supportedMimeTypes = acceptMode == QFileDialog::AcceptOpen
-        ? QImageReader::supportedMimeTypes() : QImageWriter::supportedMimeTypes();
+            ? QImageReader::supportedMimeTypes() : QImageWriter::supportedMimeTypes();
     foreach (const QByteArray &mimeTypeName, supportedMimeTypes)
         mimeTypeFilters.append(mimeTypeName);
     mimeTypeFilters.sort();
@@ -98,19 +101,35 @@ void MainWindow::save()
 
 }
 
+void MainWindow::process(Operation op)
+{
+    if (originalImage.isNull())
+    {
+        QMessageBox::information(this, QGuiApplication::applicationDisplayName(),
+                                 tr("Image not found. Please open an exsiting image file."));
+    }
+    switch(op)
+    {
+    case opEqualizeHist : qDebug("Nothing"); break;
+    case opBlur: qDebug()<<QString("blur"); break;
+    }
+}
+
 void MainWindow::setPanel(Operation op)
 {
     switch(op)
     {
-    case opEqualizeHist : qDebug("EqualizeHist"); break;
+    case opEqualizeHist :
+    {
+        break;
+    }
     case opBlur :
     {
-        auto filter = new QComboBox;
-        filter->setStyleSheet("background:white");
-        filter->addItem("Gaussian Filter");
-        filter->addItem("Median Filter");
-        filter->addItem("Bilateral Filter");
-        panel->add(filter, "Filter"); break;
+        panel.reset(new BlurPanel);
+        if (panel)
+            qDebug("fuck");
+        connect(panel.get(), &Panel::valueChanged, [=]() { this->process(opBlur); });
+        break;
     }
     }
 }
@@ -172,15 +191,11 @@ void MainWindow::createTool()
 
 void MainWindow::createPanel()
 {
-    panel = new QFrame;
+    // panel = nullptr;
     //qDebug(static_cast<BlurPanel*>(panel)->filter->currentText().toLatin1());
+    panel = std::unique_ptr<Panel>(new Panel);
     panel->setStyleSheet("background:#36393e");
     panel->setMinimumSize(200, 400);
-
-    QVBoxLayout *layout = new QVBoxLayout;
-    BlurPanel *p = new BlurPanel;
-    layout->addWidget(p);
-    panel->setLayout(layout);
 }
 
 void MainWindow::createView()

@@ -27,11 +27,13 @@ CONFIG += c++11
 SOURCES += \
         blurpanel.cpp \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+        panel.cpp
 
 HEADERS += \
         blurpanel.h \
-        mainwindow.h
+        mainwindow.h \
+        panel.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

@@ -22,7 +22,9 @@
 #include <QMessageBox>
 #include <QDebug>
 
-#include "blurpanel.h"
+#include <memory>
+
+#include "panel.h"
 
 enum Operation { opEqualizeHist, opBlur };
 
@@ -40,6 +42,8 @@ private slots:
     void save();
     void setPanel(Operation);
 
+    void process(Operation);
+
 private:
     bool loadFile(const QString &);
     void setImage(const QImage &);
@@ -52,10 +56,11 @@ private:
 
     QMenuBar *menu;
     QToolBar *tool;
-    QFrame *panel;
     QGraphicsView *view;
     QGraphicsScene scene;
     QImage originalImage, processedImage;
+
+    std::unique_ptr<Panel> panel;
 
     QMenu *fileMenu;
     QMenu *editMenu;
