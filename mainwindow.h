@@ -22,11 +22,8 @@
 #include <QMessageBox>
 #include <QDebug>
 
-#include <memory>
-
+#include "operation.h"
 #include "panel.h"
-
-enum Operation { opEqualizeHist, opBlur };
 
 class MainWindow : public QMainWindow
 {
@@ -40,8 +37,6 @@ private slots:
     void open();
     void del();
     void save();
-    void setPanel(Operation);
-
     void process(Operation);
 
 private:
@@ -56,11 +51,10 @@ private:
 
     QMenuBar *menu;
     QToolBar *tool;
+    Panel *panel;
     QGraphicsView *view;
     QGraphicsScene scene;
     QImage originalImage, processedImage;
-
-    std::unique_ptr<Panel> panel;
 
     QMenu *fileMenu;
     QMenu *editMenu;
@@ -70,7 +64,10 @@ private:
     QAction *saveAct;
     QAction *exitAct;
 
-    Operation op;
+    QVBoxLayout *mainlayout;
+    QHBoxLayout *sublayout;
+    Operation op = opNone;
+    QAction *threshold;
     QAction *equalizeHist;
     QAction *blur;
 };

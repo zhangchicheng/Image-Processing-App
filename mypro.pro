@@ -25,15 +25,31 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
-        blurpanel.cpp \
+        imgproc.cpp \
         main.cpp \
         mainwindow.cpp \
         panel.cpp
 
 HEADERS += \
-        blurpanel.h \
+        imgproc.h \
         mainwindow.h \
+        operation.h \
         panel.h
+
+win32: {
+    include("c:/dev/opencv/opencv.pri")
+}
+
+unix: !macx{
+    CONFIG += link_pkgconfig
+    PKGCONFIG += opencv
+}
+
+unix: macx{
+INCLUDEPATH += /usr/local/include
+LIBS += -L"/usr/local/lib" \
+    -lopencv_world
+}
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

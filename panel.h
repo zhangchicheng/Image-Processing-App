@@ -2,6 +2,12 @@
 #define PANEL_H
 
 #include <QFrame>
+#include <QLabel>
+#include <QComboBox>
+#include <QSpinBox>
+#include <QVBoxLayout>
+
+#include "operation.h"
 
 class Panel : public QFrame
 {
@@ -9,12 +15,16 @@ class Panel : public QFrame
 
 public:
     Panel();
-    virtual ~Panel();
+    ~Panel();
 
-    virtual void setPanel();
+    void setPanel(Operation op);
 
 signals:
-    void valueChanged();
+    void valueChanged(Operation op);
+
+private:
+    Operation op = opNone;
+    QGridLayout *panelLayout = nullptr;
 };
 
 #endif // PANEL_H

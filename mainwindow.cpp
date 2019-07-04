@@ -1,11 +1,10 @@
 #include "mainwindow.h"
-#include "blurpanel.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     QWidget *widget = new QWidget;
-    widget->setStyleSheet("QWidget {background: 'white';}");
+    widget->setStyleSheet("Panel {background: #36393e;}");
     setCentralWidget(widget);
 
     createActions();
@@ -14,13 +13,15 @@ MainWindow::MainWindow(QWidget *parent)
     createPanel();
     createView();
 
-    QVBoxLayout *mainlayout = new QVBoxLayout;
+    mainlayout = new QVBoxLayout;
+    mainlayout->setMargin(0);
     mainlayout->setMenuBar(menu);
     mainlayout->addWidget(tool);
 
-    QHBoxLayout *sublayout = new QHBoxLayout;
-    sublayout->addWidget(panel.get(), 1);
-    sublayout->addWidget(view, 3);
+    sublayout = new QHBoxLayout;
+    sublayout->setSpacing(0);
+    sublayout->addWidget(view);
+    sublayout->addWidget(panel);
 
     mainlayout->addLayout(sublayout);
     widget->setLayout(mainlayout);
@@ -35,8 +36,7 @@ bool MainWindow::loadFile(const QString &fileName)
 {
     QImageReader reader(fileName);
     reader.setAutoTransform(true);
-    //const QImage newImage = reader.read();
-    QImage newImage;
+    const QImage newImage = reader.read();
     if (newImage.isNull())
     {
         QMessageBox::information(this, QGuiApplication::applicationDisplayName(),
@@ -103,34 +103,26 @@ void MainWindow::save()
 
 void MainWindow::process(Operation op)
 {
+
     if (originalImage.isNull())
     {
         QMessageBox::information(this, QGuiApplication::applicationDisplayName(),
                                  tr("Image not found. Please open an exsiting image file."));
+        return;
     }
     switch(op)
     {
-    case opEqualizeHist : qDebug("Nothing"); break;
-    case opBlur: qDebug()<<QString("blur"); break;
+    case opEqualizeHist:
+    {
+        qDebug("equalizeHist"); break;
     }
-}
-
-void MainWindow::setPanel(Operation op)
-{
-    switch(op)
+    case opBlur:
     {
-    case opEqualizeHist :
-    {
+        QComboBox *filter = this->panel->findChild<QComboBox*>("Filter");
+        qDebug()<<(filter->currentText());
         break;
     }
-    case opBlur :
-    {
-        panel.reset(new BlurPanel);
-        if (panel)
-            qDebug("fuck");
-        connect(panel.get(), &Panel::valueChanged, [=]() { this->process(opBlur); });
-        break;
-    }
+    default: break;
     }
 }
 
@@ -153,9 +145,11 @@ void MainWindow::createActions()
     connect(exitAct, &QAction::triggered, this, &QWidget::close);
 
     equalizeHist = new QAction(tr("Euqalize Histogram"));
-    connect(equalizeHist, &QAction::triggered, this, [=]() { setPanel(opEqualizeHist); });
+    connect(equalizeHist, &QAction::triggered, [=]() { panel->setPanel(opEqualizeHist); });
+    threshold = new QAction(tr("Threshold"));
+    connect(threshold, &QAction::triggered, [=]() { panel->setPanel(opThreshold); });
     blur = new QAction(tr("Blur"));
-    connect(blur, &QAction::triggered, this, [=]() { setPanel(opBlur); });
+    connect(blur, &QAction::triggered, [=]() { panel->setPanel(opBlur); });
 }
 
 void MainWindow::createMenu()
@@ -165,12 +159,14 @@ void MainWindow::createMenu()
     fileMenu = new QMenu(tr("&File"), this);
     fileMenu->addAction(openAct);
     fileMenu->addAction(saveAct);
+    fileMenu->addSeparator();
     fileMenu->addAction(exitAct);
 
     editMenu = new QMenu(tr("&Edit"), this);
     editMenu->addAction(delAct);
 
     toolsMenu = new QMenu(tr("&Tools"), this);
+    toolsMenu->addAction(threshold);
     toolsMenu->addAction(equalizeHist);
     toolsMenu->addAction(blur);
 
@@ -191,17 +187,16 @@ void MainWindow::createTool()
 
 void MainWindow::createPanel()
 {
-    // panel = nullptr;
-    //qDebug(static_cast<BlurPanel*>(panel)->filter->currentText().toLatin1());
-    panel = std::unique_ptr<Panel>(new Panel);
-    panel->setStyleSheet("background:#36393e");
-    panel->setMinimumSize(200, 400);
+    panel = new Panel;
+    connect(panel, &Panel::valueChanged, [=](Operation op) { process(op); });
+    panel->setFixedWidth(256);
 }
 
 void MainWindow::createView()
 {
     view = new QGraphicsView;
-    view->setMinimumSize(600, 400);
-    view->setStyleSheet("background:gray");
+    view->setMinimumSize(512, 512);
     view->setScene(&scene);
+    view->setBackgroundBrush(QBrush(QColor("#2c2e33")));
+    view->setStyleSheet("border: 0px");
 }
