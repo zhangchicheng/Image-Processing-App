@@ -3,8 +3,11 @@
 
 #include <QFrame>
 #include <QLabel>
+#include <QGroupBox>
 #include <QComboBox>
 #include <QSpinBox>
+#include <QDoubleSpinBox>
+#include <QTextEdit>
 #include <QVBoxLayout>
 
 #include "operation.h"
@@ -22,8 +25,9 @@ public:
 signals:
     void valueChanged(Operation op);
 
-private:
+public:
     Operation op = opNone;
+    QLabel *title = nullptr;
     QVBoxLayout *panelLayout = nullptr;
 };
 

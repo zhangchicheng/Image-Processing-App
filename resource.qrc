@@ -5,6 +5,8 @@
 	<file>icons/trash-can.png</file>
         <file>icons/zoom-in.png</file>
         <file>icons/zoom-out.png</file>
+        <file>icons/flip-horizontally.png</file>
+        <file>icons/flip-vertically.png</file>
         <file>icons/exit.png</file>
         <file>icons/help.png</file>
     </qresource>

@@ -25,15 +25,19 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
+        histogram.cpp \
         main.cpp \
         mainwindow.cpp \
-        panel.cpp
+        panel.cpp \
+        transactionthread.cpp
 
 HEADERS += \
+        histogram.h \
         imgproc.h \
         mainwindow.h \
         operation.h \
-        panel.h
+        panel.h \
+        transactionthread.h
 
 win32: {
     include("c:/dev/opencv/opencv.pri")

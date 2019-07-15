@@ -51,7 +51,7 @@ QImage::Format adjustFormat(QImage::Format formatHint)
     return format;
 }
 
-cv::Mat QImage2CvMat(const QImage &img, bool clone=false, bool rgbSwap=false)
+cv::Mat QImage2CvMat(const QImage &img, bool clone=true, bool rgbSwap=false)
 {
     if (img.isNull())
         return cv::Mat();
@@ -120,12 +120,60 @@ QImage CvMat2QImage(const cv::Mat &mat, bool clone=true, bool rgbSwap=false)
     }
 }
 
-void threshold(QImage &srcImg, QImage &dstImg, int thresh, int maxVal, QString type)
+QImage blur(QImage &srcImg, int width, int height)
+{
+    cv::Mat srcMat, dstMat;
+    srcMat = QImage2CvMat(srcImg);
+    cv::blur(srcMat, dstMat, cv::Size(width, height));
+    return CvMat2QImage(dstMat);
+}
+
+QImage medianBlur(QImage &srcImg, int size)
+{
+    cv::Mat srcMat, dstMat;
+    srcMat = QImage2CvMat(srcImg);
+    cv::medianBlur(srcMat, dstMat, size);
+    return CvMat2QImage(dstMat);
+}
+
+QImage GaussianBlur(QImage &srcImg, int width, int height, double sigmaX, double sigmaY)
+{
+    cv::Mat srcMat, dstMat;
+    srcMat = QImage2CvMat(srcImg);
+    cv::GaussianBlur(srcMat, dstMat, cv::Size(width, height), sigmaX, sigmaY);
+    return CvMat2QImage(dstMat);
+}
+
+QImage bilateralFilter(QImage &srcImg, int d, double color, double space)
+{
+    cv::Mat srcMat, dstMat;
+    srcMat = QImage2CvMat(srcImg);
+
+    if (srcMat.type()==CV_8UC4)
+    {
+        cv::Mat bgr(srcMat.rows, srcMat.cols, CV_8UC3);
+        cv::Mat alpha(srcMat.rows, srcMat.cols, CV_8UC1);
+        cv::Mat out[] = { bgr, alpha };
+        int fromTo[] = {0,2,1,1,2,0,3,3};
+        cv::mixChannels(&srcMat, 1, out, 2, fromTo, 4);
+        cv::bilateralFilter(bgr, dstMat, d, color, space);
+    }
+    else
+    {
+        cv::bilateralFilter(srcMat, dstMat, d, color, space);
+    }
+    return CvMat2QImage(dstMat);
+}
+
+QImage threshold(QImage &srcImg, int thresh, int maxVal, QString type)
 {
     cv::Mat srcMat, grayMat, dstMat;
     srcMat = QImage2CvMat(srcImg);
     switch (srcMat.type())
     {
+    case CV_8UC1:
+        grayMat = srcMat;
+        break;
     case CV_8UC3:
         cv::cvtColor(srcMat, grayMat, cv::COLOR_BGR2GRAY);
         break;
@@ -142,14 +190,50 @@ void threshold(QImage &srcImg, QImage &dstImg, int thresh, int maxVal, QString t
                                                                                                      cv::THRESH_TOZERO_INV;
 
     cv::threshold(grayMat, dstMat, thresh, maxVal, threshType);
-    dstImg = CvMat2QImage(dstMat);
+    return CvMat2QImage(dstMat);
 }
 
-
-void testConversion(QImage &srcImg, QImage &dstImg)
+QImage equalizeHist(QImage &srcImg)
 {
-    cv::Mat srcMat = QImage2CvMat(srcImg);
-    dstImg = CvMat2QImage(srcMat);
+    cv::Mat srcMat, grayMat, dstMat;
+    srcMat = QImage2CvMat(srcImg);
+    switch (srcMat.type())
+    {
+    case CV_8UC3:
+        cv::cvtColor(srcMat, grayMat, cv::COLOR_BGR2GRAY);
+        break;
+    case CV_8UC4:
+        cv::cvtColor(srcMat, grayMat, cv::COLOR_BGRA2GRAY);
+        break;
+    default:
+        break;
+    }
+    cv::equalizeHist(grayMat, dstMat);
+    return CvMat2QImage(dstMat);
+}
+
+QImage erode(QImage &srcImg, QString kernel, int size)
+{
+    cv::Mat srcMat, dstMat;
+    srcMat = QImage2CvMat(srcImg);
+    int k = kernel=="Rectangular Box" ? cv::MORPH_RECT :
+                                        kernel=="Cross" ? cv::MORPH_CROSS : cv::MORPH_ELLIPSE;
+    cv::Mat element = getStructuringElement(k, cv::Size(2*size+1, 2*size+1), cv::Point(size, size));
+
+    cv::erode(srcMat, dstMat, element);
+    return CvMat2QImage(dstMat);
+}
+
+QImage dilate(QImage &srcImg, QString kernel, int size)
+{
+    cv::Mat srcMat, dstMat;
+    srcMat = QImage2CvMat(srcImg);
+    int k = kernel=="Rectangular Box" ? cv::MORPH_RECT :
+                                        kernel=="Cross" ? cv::MORPH_CROSS : cv::MORPH_ELLIPSE;
+    cv::Mat element = getStructuringElement(k, cv::Size(2*size+1, 2*size+1), cv::Point(size, size));
+
+    cv::dilate(srcMat, dstMat, element);
+    return CvMat2QImage(dstMat);
 }
 
 }
