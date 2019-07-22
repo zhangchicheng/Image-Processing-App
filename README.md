@@ -1,7 +1,7 @@
 # Image-Processing-App
 An image processing application based on Qt and OpenCV. it allows importing/saving, editing, and processing digital images.
 
-## dependencies
+## Dependencies
 * Qt = 5.12.3
 * OpenCV = 3.2.0
 
