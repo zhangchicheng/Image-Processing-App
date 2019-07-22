@@ -29,6 +29,7 @@ then run it
 ## Screenshoot
 <img src=https://github.com/zhangchicheng/Image-Processing-App/blob/master/screenshot/mainwindow.png>
 <img src=https://github.com/zhangchicheng/Image-Processing-App/blob/master/screenshot/erode.png>
+<img src=https://github.com/zhangchicheng/Image-Processing-App/blob/master/screenshot/blur.png>
 <img src=https://github.com/zhangchicheng/Image-Processing-App/blob/master/screenshot/dilate.png>
 
 
