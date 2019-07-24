@@ -27,9 +27,7 @@ then run it
 * Dilate
 
 ## Screenshoot
-<img src=https://github.com/zhangchicheng/Image-Processing-App/blob/master/screenshot/mainwindow.png>
-<img src=https://github.com/zhangchicheng/Image-Processing-App/blob/master/screenshot/erode.png>
-<img src=https://github.com/zhangchicheng/Image-Processing-App/blob/master/screenshot/blur.png>
-<img src=https://github.com/zhangchicheng/Image-Processing-App/blob/master/screenshot/dilate.png>
+<img src=https://github.com/zhangchicheng/Image-Processing-App/blob/master/screenshot/mainwindow.png height=300> <img src=https://github.com/zhangchicheng/Image-Processing-App/blob/master/screenshot/erode.png height=300>
+<img src=https://github.com/zhangchicheng/Image-Processing-App/blob/master/screenshot/blur.png height=300> <img src=https://github.com/zhangchicheng/Image-Processing-App/blob/master/screenshot/dilate.png height=300>
 
 
